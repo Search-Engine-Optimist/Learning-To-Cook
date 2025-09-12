@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://learningtocook.co.uk/sitemap.xml
