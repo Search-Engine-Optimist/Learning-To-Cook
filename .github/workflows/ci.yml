@@ -38,16 +38,17 @@ jobs:
       - name: Accessibility (pa11y-ci)
         run: npx pa11y-ci --config pa11yci.json
 
-      - name: Lighthouse CI (budgets)
-        uses: treosh/lighthouse-ci-action@v11
-        with:
-          urls: |
-            http://127.0.0.1:8080/index.html
-            http://127.0.0.1:8080/about.html
-            http://127.0.0.1:8080/recipes.html
-          budgetPath: ./lighthouse/budgets.json
-          uploadArtifacts: true
-          temporaryPublicStorage: true
+     - name: Lighthouse CI (budgets)
+  uses: treosh/lighthouse-ci-action@v11
+  with:
+    urls: |
+      http://127.0.0.1:8080/index.html
+      http://127.0.0.1:8080/about.html
+      http://127.0.0.1:8080/recipes.html
+    configPath: ./lighthouserc.json
+    uploadArtifacts: true
+    temporaryPublicStorage: true
+
 
 
 
