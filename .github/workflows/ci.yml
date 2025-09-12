@@ -23,11 +23,12 @@ jobs:
         run: npx prettier --check "**/*.{html,css,md}"
 
       - name: Link check (lychee)
-        uses: lycheeverse/lychee-action@v1
-        with:
-          args: --no-progress --verbose --exclude-mail --max-concurrency 5 .
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  uses: lycheeverse/lychee-action@v1
+  with:
+    args: --no-progress --verbose --max-concurrency 5 .
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: Start static server
         run: |
@@ -47,5 +48,6 @@ jobs:
           budgetPath: ./lighthouse/budgets.json
           uploadArtifacts: true
           temporaryPublicStorage: true
+
 
 
