@@ -32,7 +32,7 @@ jobs:
       - name: Link check (lychee)
         uses: lycheeverse/lychee-action@v1
         with:
-          args: --no-progress --verbose --max-concurrency 5 --retry 2 --timeout 20 . 
+          args: --no-progress --verbose --max-concurrency 5 --timeout 20 . 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
