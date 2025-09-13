@@ -20,13 +20,17 @@ jobs:
           cache: npm
 
       - name: Install deps
-        run: npm ci
+        run: npm install --no-audit --no-fund
+
       
       - name: ESLint (npx)
         run: npx eslint@8.57.0 . --ext .js,.mjs,.cjs --max-warnings=0
 
       - name: Prettier formatting check
         run: npm run prettier:check
+      - name: Tests (Vitest)
+        run: npm run test:coverage
+
 
       - name: Build site
         run: npm run build --if-present   
