@@ -1,15 +1,16 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches: [main]
+    branches: [ main, pally-ci ]  # include your feature branch too
+  pull_request:
 
 jobs:
   link_lint_a11y_perf:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+
     steps:
       - uses: actions/checkout@v4
 
@@ -18,13 +19,16 @@ jobs:
           node-version: 18
           cache: npm
 
-      - name: Install dev deps
+      - name: Install deps
         run: npm ci
 
       - name: Prettier formatting check
         run: npm run prettier:check
 
-           - name: Install Chromium deps (for Puppeteer)
+      - name: Build site
+        run: npm run build --if-present   # adjust if your build script has a different name
+
+      - name: Install Chromium deps (for Puppeteer)
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -33,33 +37,34 @@ jobs:
             libxcomposite1 libxdamage1 libxrandr2 libxss1 libxtst6 libgbm1
 
       - name: Start static server
-  run: |
-    python3 -m http.server 8080 --directory ./dist &
+        run: python3 -m http.server 8080 --directory ./dist &
+        # If your build output isn't ./dist, change the path above and URLs below.
 
-- name: Wait for server
-  run: npx wait-on http://127.0.0.1:8080/index.html
-
-- name: Accessibility (pa11y-ci)
-  run: npx pa11y-ci
-
+      - name: Wait for server
+        run: npx wait-on http://127.0.0.1:8080/index.html
 
       - name: Link check (lychee)
-  uses: lycheeverse/lychee-action@v1
-  with:
-    args: --config lychee.toml --exclude-file .lycheeignore .
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --config lychee.toml --exclude-file .lycheeignore .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Prepare artifacts dir
+        run: mkdir -p artifacts
 
-      - name: Accessibility (pa11y-ci)
-        run: npx pa11y-ci --config pa11yci.json
+      - name: Accessibility (pa11y-ci) – HTML report
+        run: |
+          set -euo pipefail
+          npx pa11y-ci --config pa11yci.json --reporter html > artifacts/a11y-report.html
 
-        - name: Upload a11y report
+      - name: Upload a11y report
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: a11y-report
-          path: a11y-report.html
+          path: artifacts/a11y-report.html
+          retention-days: 7
 
       - name: Lighthouse CI (budgets)
         uses: treosh/lighthouse-ci-action@v11
@@ -73,27 +78,4 @@ jobs:
           configPath: ./lighthouserc.json
           uploadArtifacts: true
           temporaryPublicStorage: true
-# Ensure a stable folder for outputs
-- name: Prepare artifacts dir
-  run: mkdir -p artifacts
 
-# Run Pa11y and always leave behind a report file
-- name: Accessibility (pa11y-ci) – HTML report
-  run: |
-    set -euo pipefail
-    EXIT=0
-    npx pa11y-ci --reporter html > artifacts/a11y-report.html || EXIT=$?
-    echo "pa11y exit code: $EXIT" | tee artifacts/a11y-summary.txt
-    # If report is empty/missing (rare), leave a placeholder so upload never fails
-    [ -s artifacts/a11y-report.html ] || echo "<html><body><p>No report (exit $EXIT).</p></body></html>" > artifacts/a11y-report.html
-    exit $EXIT
-
-# Upload artifact even if pa11y failed (so you can still see the report)
-- name: Upload a11y report
-  if: ${{ always() }}
-  uses: actions/upload-artifact@v4
-  with:
-    name: a11y-report
-    path: artifacts/*
-    retention-days: 7
-    if-no-files-found: warn
