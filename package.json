@@ -1,7 +1,9 @@
 {
   "name": "learning-to-cook-site",
   "private": true,
-  "devDependencies": { "prettier": "3.6.2" },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  },
   "scripts": {
     "prettier:check": "prettier --check \"**/*.{html,css,md}\"",
     "prettier:write": "prettier --write \"**/*.{html,css,md}\""
