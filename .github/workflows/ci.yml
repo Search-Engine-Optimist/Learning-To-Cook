@@ -42,6 +42,29 @@ jobs:
 
       - name: Wait for server
         run: npx wait-on http://127.0.0.1:8080/index.html
+        - name: Prepare artifacts dir
+  run: mkdir -p artifacts
+
+- name: Pa11y (HTML report)
+  id: pa11y
+  shell: bash
+  run: |
+    set +e
+    npx pa11y-ci --config pa11yci.json --reporter html > artifacts/a11y-report.html
+    echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+- name: Upload a11y report
+  if: ${{ always() }}
+  uses: actions/upload-artifact@v4
+  with:
+    name: a11y-report
+    path: artifacts/a11y-report.html
+    retention-days: 7
+
+- name: Fail on Pa11y violations
+  if: ${{ steps.pa11y.outputs.exit_code != '0' }}
+  run: exit 1
+
 
       - name: Link check (lychee)
         uses: lycheeverse/lychee-action@v1
