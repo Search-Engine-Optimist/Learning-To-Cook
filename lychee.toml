@@ -1,0 +1,19 @@
+# Ignore folders we don't want to scan
+exclude_path = [
+  "node_modules",
+  ".git",
+  ".github",
+  "_site"
+]
+
+# Retry/timeout to reduce flakes
+max_concurrency = 5
+retry_count = 2
+timeout = 20
+
+# Ignore schemes we never want to check
+exclude = [
+  "^mailto:",
+  "^tel:",
+  "^javascript:"
+]
