@@ -21,6 +21,9 @@ jobs:
 
       - name: Install deps
         run: npm ci
+      
+      - name: ESLint (npx)
+        run: npx eslint@8.57.0 . --ext .js,.mjs,.cjs --max-warnings=0
 
       - name: Prettier formatting check
         run: npm run prettier:check
