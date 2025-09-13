@@ -13,6 +13,9 @@
     "prettier:write": "prettier --write \"**/*.{html,css,md}\"",
     "serve:static": "http-server ./dist -p 8080 --silent",
     "a11y": "run-p -r serve:static a11y:run",
-    "a11y:run": "wait-on http://127.0.0.1:8080 && pa11y-ci"
+    "a11y:run": "wait-on http://127.0.0.1:8080 && pa11y-ci",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+
   }
 }
