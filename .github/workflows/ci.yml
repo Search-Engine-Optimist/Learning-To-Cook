@@ -21,6 +21,9 @@ jobs:
 
       - name: Install deps
         run: npm ci
+      
+      - name: ESLint (npx)
+        run: npx eslint@8.57.0 . --ext .js,.mjs,.cjs --max-warnings=0
 
       - name: Prettier formatting check
         run: npm run prettier:check
@@ -35,6 +38,11 @@ jobs:
             ca-certificates fonts-liberation xdg-utils libasound2 libatk-bridge2.0-0 \
             libatk1.0-0 libcups2 libdbus-1-3 libgtk-3-0 libnspr4 libnss3 libx11-xcb1 \
             libxcomposite1 libxdamage1 libxrandr2 libxss1 libxtst6 libgbm1
+            - name: ESLint
+              run: npm run lint:ci
+
+            - name: Prettier formatting check
+              run: npm run prettier:check
 
       - name: Start static server
         run: python3 -m http.server 8080 --directory ./dist &
@@ -42,7 +50,7 @@ jobs:
 
       - name: Wait for server
         run: npx wait-on http://127.0.0.1:8080/index.html
-        - name: Prepare artifacts dir
+      - name: Prepare artifacts dir
   run: mkdir -p artifacts
 
 - name: Pa11y (HTML report)
