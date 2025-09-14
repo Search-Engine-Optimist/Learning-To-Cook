@@ -1,7 +1,11 @@
-import { readFileSync, existsSync } from 'node:fs'
-import { join, dirname, normalize } from 'node:path'
+import { readFileSync, existsSync } from 'node:fs',
+import { join, dirname, normalize } from 'node:path',
 import { expect } from 'vitest';
-import cheerio from 'cheerio'
+import cheerio from 'cheerio
+
+  test('basic math works', () => {
+  expect(1 + 1).toBe(2);
+});
 
 function load(file) {
   if (!existsSync(join('.', file))) throw new Error(`Missing file: ${file}`);
