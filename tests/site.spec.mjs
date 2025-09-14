@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname, normalize } from 'node:path';
 import cheerio from 'cheerio';
+import { test, expect } from 'vitest';
 
 import { expect } from 'vitest';
 
