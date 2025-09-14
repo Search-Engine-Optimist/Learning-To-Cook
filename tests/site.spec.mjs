@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { readFileSync, existsSync } from 'node:fs'
+import { join, dirname, normalize } from 'node:path'
 import * as cheerio from 'cheerio'
 
 // Pages are served from repo root in your CI
@@ -48,5 +48,50 @@ test('headings don’t skip levels on About', () => {
   const levels = $('h1,h2,h3').map((_, el) => Number(el.tagName[1])).get()
   for (let i = 1; i < levels.length; i++) {
     expect(levels[i] - levels[i - 1]).toBeLessThanOrEqual(1)
+  }
+})
+const isExternal = (u = '') =>
+  /^(https?:)?\/\//i.test(u) || u.startsWith('data:') || u.startsWith('blob:')
+
+const stripQueryHash = (u = '') => u.split('#')[0].split('?')[0]
+
+function checkCandidate(relUrl, pageFile, errors) {
+  if (!relUrl) return
+  const url = stripQueryHash(relUrl.trim())
+  if (!url || isExternal(url)) return
+
+  const baseDir = dirname(pageFile)
+  const absPath = url.startsWith('/')
+    ? join('.', url.replace(/^\/+/, ''))    // '/images/x.jpg' -> './images/x.jpg'
+    : normalize(join('.', baseDir, url))    // relative to the page
+
+  if (!existsSync(absPath)) {
+    errors.push(`[${pageFile}] missing image asset: ${url} → ${absPath}`)
+  }
+}
+
+test('all <img> src/srcset files exist locally', () => {
+  const allErrors = []
+
+  for (const page of PAGES) {
+    const $ = load(page)
+
+    $('img').each((_, el) => {
+      // src
+      checkCandidate($(el).attr('src'), page, allErrors)
+
+      // srcset (e.g. "img@1x.jpg 1x, img@2x.jpg 2x")
+      const srcset = $(el).attr('srcset')
+      if (srcset) {
+        srcset.split(',').forEach(entry => {
+          const candidate = entry.trim().split(/\s+/)[0]
+          checkCandidate(candidate, page, allErrors)
+        })
+      }
+    })
+  }
+
+  if (allErrors.length) {
+    throw new Error('\n' + allErrors.join('\n'))
   }
 })
