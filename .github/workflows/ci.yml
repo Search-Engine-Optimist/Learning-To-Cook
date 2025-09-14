@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, pally-ci ]  
+    branches: [ main ]
   pull_request:
 
 jobs:
@@ -22,76 +22,41 @@ jobs:
       - name: Install deps
         run: npm install --no-audit --no-fund
 
-      
       - name: ESLint (npx)
         run: npx eslint@8.57.0 . --ext .js,.mjs,.cjs --max-warnings=0
 
       - name: Prettier formatting check
         run: npm run prettier:check
+
       - name: Tests (Vitest)
         run: npm run test:coverage
 
-
-      - name: Build site
-        run: npm run build --if-present   
-
-      - name: Install Chromium deps (for Puppeteer)
+      - name: Install Chromium deps (for Pa11y/Lighthouse)
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             ca-certificates fonts-liberation xdg-utils libasound2 libatk-bridge2.0-0 \
             libatk1.0-0 libcups2 libdbus-1-3 libgtk-3-0 libnspr4 libnss3 libx11-xcb1 \
             libxcomposite1 libxdamage1 libxrandr2 libxss1 libxtst6 libgbm1
-            - name: ESLint
-              run: npm run lint:ci
 
-            - name: Prettier formatting check
-              run: npm run prettier:check
-
+      # Serve from repo ROOT (you don’t have ./dist)
       - name: Start static server
-        run: python3 -m http.server 8080 --directory ./dist &
-        
+        run: python3 -m http.server 8080 --directory . &
 
       - name: Wait for server
         run: npx wait-on http://127.0.0.1:8080/index.html
-      - name: Prepare artifacts dir
-  run: mkdir -p artifacts
 
-- name: Pa11y (HTML report)
-  id: pa11y
-  shell: bash
-  run: |
-    set +e
-    npx pa11y-ci --config pa11yci.json --reporter html > artifacts/a11y-report.html
-    echo "exit_code=$?" >> "$GITHUB_OUTPUT"
-
-- name: Upload a11y report
-  if: ${{ always() }}
-  uses: actions/upload-artifact@v4
-  with:
-    name: a11y-report
-    path: artifacts/a11y-report.html
-    retention-days: 7
-
-- name: Fail on Pa11y violations
-  if: ${{ steps.pa11y.outputs.exit_code != '0' }}
-  run: exit 1
-
-
-      - name: Link check (lychee)
-        uses: lycheeverse/lychee-action@v1
-        with:
-          args: --config lychee.toml --exclude-file .lycheeignore .
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      # --- Pa11y HTML report + artifact ---
       - name: Prepare artifacts dir
         run: mkdir -p artifacts
 
-      - name: Accessibility (pa11y-ci) – HTML report
+      - name: Pa11y (HTML report)
+        id: pa11y
+        shell: bash
         run: |
-          set -euo pipefail
+          set +e
           npx pa11y-ci --config pa11yci.json --reporter html > artifacts/a11y-report.html
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
 
       - name: Upload a11y report
         if: ${{ always() }}
@@ -100,6 +65,18 @@ jobs:
           name: a11y-report
           path: artifacts/a11y-report.html
           retention-days: 7
+
+      - name: Fail on Pa11y violations
+        if: ${{ steps.pa11y.outputs.exit_code != '0' }}
+        run: exit 1
+      # --- end Pa11y block ---
+
+      - name: Link check (lychee)
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --config lychee.toml --exclude-file .lycheeignore .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lighthouse CI (budgets)
         uses: treosh/lighthouse-ci-action@v11
@@ -113,4 +90,5 @@ jobs:
           configPath: ./lighthouserc.json
           uploadArtifacts: true
           temporaryPublicStorage: true
+
 
