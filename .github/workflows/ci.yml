@@ -45,8 +45,6 @@ jobs:
 
       - name: Wait for server
         run: npx wait-on http://127.0.0.1:8080/index.html
-
-      # --- Pa11y HTML report + artifact ---
       - name: Prepare artifacts dir
         run: mkdir -p artifacts
 
@@ -69,8 +67,7 @@ jobs:
       - name: Fail on Pa11y violations
         if: ${{ steps.pa11y.outputs.exit_code != '0' }}
         run: exit 1
-      # --- end Pa11y block ---
-
+       
       - name: Link check (lychee)
         uses: lycheeverse/lychee-action@v1
         with:
