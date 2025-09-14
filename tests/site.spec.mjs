@@ -1,3 +1,9 @@
+// At the top of tests/site.spec.mjs
+function load(file) {
+  if (!existsSync(join('.', file))) throw new Error(`Missing file: ${file}`);
+  const html = readFileSync(join('.', file), 'utf8');
+  return cheerio.load(html);
+  
 import { readFileSync, existsSync } from 'node:fs'
 import { join, dirname, normalize } from 'node:path'
 import * as cheerio from 'cheerio'
@@ -10,11 +16,6 @@ const PAGES = [
   'contact.html',
   'recipes/spaghetti.html'
 ]
-
-function load(file) {
-  const html = readFileSync(join('.', file), 'utf8')
-  return cheerio.load(html)
-}
 
 test('each page has <html lang>, charset, viewport, title, main', () => {
   for (const file of PAGES) {
@@ -32,11 +33,7 @@ test('recipe detail images have meaningful alt text', () => {
   $('img').each((_, el) => {
     const alt = $(el).attr('alt')
     expect(alt && alt.trim().length).toBeGreaterThan(0)
-    function load(file) {
-  if (!existsSync(join('.', file))) throw new Error(`Missing file: ${file}`);
-  const html = readFileSync(join('.', file), 'utf8');
-  return cheerio.load(html);
-}
+  
   })
 })
 
