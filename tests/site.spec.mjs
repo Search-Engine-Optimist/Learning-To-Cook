@@ -32,6 +32,11 @@ test('recipe detail images have meaningful alt text', () => {
   $('img').each((_, el) => {
     const alt = $(el).attr('alt')
     expect(alt && alt.trim().length).toBeGreaterThan(0)
+    function load(file) {
+  if (!existsSync(join('.', file))) throw new Error(`Missing file: ${file}`);
+  const html = readFileSync(join('.', file), 'utf8');
+  return cheerio.load(html);
+}
   })
 })
 
