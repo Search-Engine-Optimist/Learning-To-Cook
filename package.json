@@ -11,7 +11,7 @@
     "cheerio": "^1.0.0-rc.12"
   },
  "scripts": {
-  "prettier:check": "prettier --check \"**/*.{html,css,md}\""
+  "prettier:check": "prettier --check \"**/*.{html,css,md}\"",
 
   "prettier:write": "prettier --write \"**/*.{html,css,js,mjs,json,md}\"",
 
