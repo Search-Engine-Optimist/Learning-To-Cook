@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from 'node:fs'
 import { join, dirname, normalize } from 'node:path'
-import * as cheerio from 'cheerio'
+import cheerio from 'cheerio'
 
 function load(file) {
   if (!existsSync(join('.', file))) throw new Error(`Missing file: ${file}`);
@@ -15,6 +15,10 @@ const PAGES = [
   'contact.html',
   'recipes/spaghetti.html'
 ]
+test('vitest can run tests', () => {
+  expect(1).toBe(1)
+})
+
 
 test('each page has <html lang>, charset, viewport, title, main', () => {
   for (const file of PAGES) {
