@@ -6,6 +6,7 @@ function load(file) {
   if (!existsSync(join('.', file))) throw new Error(`Missing file: ${file}`);
   const html = readFileSync(join('.', file), 'utf8');
   return cheerio.load(html);
+  ]
   
 const PAGES = [
   'index.html',
