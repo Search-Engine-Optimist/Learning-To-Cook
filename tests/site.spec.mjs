@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs'
 import { join, dirname, normalize } from 'node:path'
-import as cheerio from 'cheerio'
+import { describe, it, expect } from 'vitest'
+import cheerio from 'cheerio'
 
 function load(file) {
   if (!existsSync(join('.', file))) throw new Error(`Missing file: ${file}`);
