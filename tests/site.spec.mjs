@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs',
 import { join, dirname, normalize } from 'node:path',
-import { expect } from 'vitest';
 import cheerio from 'cheerio
+import { expect } from 'vitest';
 
   test('basic math works', () => {
   expect(1 + 1).toBe(2);
