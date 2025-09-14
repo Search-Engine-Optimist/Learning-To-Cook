@@ -1,14 +1,12 @@
-// At the top of tests/site.spec.mjs
+import { readFileSync, existsSync } from 'node:fs'
+import { join, dirname, normalize } from 'node:path'
+import * as cheerio from 'cheerio'
+
 function load(file) {
   if (!existsSync(join('.', file))) throw new Error(`Missing file: ${file}`);
   const html = readFileSync(join('.', file), 'utf8');
   return cheerio.load(html);
   
-import { readFileSync, existsSync } from 'node:fs'
-import { join, dirname, normalize } from 'node:path'
-import * as cheerio from 'cheerio'
-
-// Pages are served from repo root in your CI
 const PAGES = [
   'index.html',
   'about.html',
