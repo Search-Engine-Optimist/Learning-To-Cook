@@ -32,12 +32,21 @@ jobs:
         run: npm run test:coverage
 
       - name: Install Chromium deps (for Pa11y/Lighthouse)
+        shell: bash
         run: |
+          set -euxo pipefail
           sudo apt-get update
+          # Choose correct ALSA package for this Ubuntu version
+          if apt-cache policy libasound2t64 >/dev/null 2>&1; then
+            ASOUND=libasound2t64
+          else
+            ASOUND=libasound2
+          fi
           sudo apt-get install -y \
-            ca-certificates fonts-liberation xdg-utils libasound2t64 libatk-bridge2.0-0 \
-            libatk1.0-0 libcups2 libdbus-1-3 libgtk-3-0 libnspr4 libnss3 libx11-xcb1 \
-            libxcomposite1 libxdamage1 libxrandr2 libxss1 libxtst6 libgbm1
+            ca-certificates fonts-liberation xdg-utils \
+            libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libgtk-3-0 \
+            libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 \
+            libxss1 libxtst6 libgbm1 "$ASOUND"
 
       # Serve from repo ROOT (you don’t have ./dist)
       - name: Start static server
