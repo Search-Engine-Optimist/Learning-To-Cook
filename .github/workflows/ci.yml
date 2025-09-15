@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20          # Node 20 avoids File/polyfill issues in tests
           cache: npm
 
       - name: Install deps
@@ -36,31 +36,31 @@ jobs:
         run: |
           set -euxo pipefail
           sudo apt-get update
-          # Choose correct ALSA package for this Ubuntu version
+          # Pick the correct ALSA package for this Ubuntu version (24.04 uses libasound2t64)
           if apt-cache policy libasound2t64 >/dev/null 2>&1; then
             ASOUND=libasound2t64
           else
-            ASOUND=libasound2t64
+            ASOUND=libasound2
           fi
+          echo "Using ALSA package: $ASOUND"
           sudo apt-get install -y \
             ca-certificates fonts-liberation xdg-utils \
             libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libgtk-3-0 \
             libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 \
             libxss1 libxtst6 libgbm1 "$ASOUND"
 
-      # Serve from repo ROOT (you don’t have ./dist)
+      # Serve from the REPO ROOT (you don't have ./dist)
       - name: Start static server
         run: python3 -m http.server 8080 --directory . &
 
       - name: Wait for server
         run: npx wait-on http://127.0.0.1:8080/index.html
+
+      # ---------- Pa11y: robust HTML artifact with stderr fallback ----------
       - name: Prepare artifacts dir
         run: mkdir -p artifacts
 
-           - name: Prepare artifacts dir
-        run: mkdir -p artifacts
-
-      - name: Pa11y (HTML report with fallback)
+      - name: Pa11y (HTML report with debug)
         id: pa11y
         shell: bash
         run: |
@@ -69,27 +69,34 @@ jobs:
           ERR="artifacts/a11y-stderr.log"
           TMP="$(mktemp)"
 
-          # Try to produce HTML report to a temp file; capture stderr separately
+          # Run Pa11y: HTML -> temp, stderr -> log
           npx pa11y-ci --config pa11yci.json --reporter html > "$TMP" 2> "$ERR"
           EXIT=$?
 
-          # If HTML was produced, move it into place; otherwise wrap stderr as minimal HTML
+          # If HTML exists, move it; otherwise wrap stderr as HTML so you can open it
           if [ -s "$TMP" ]; then
             mv "$TMP" "$OUT"
+            WROTE_REPORT=yes
           else
             {
               echo '<!doctype html><meta charset="utf-8"><title>Pa11y error</title><h1>Pa11y run failed</h1><pre>'
-              # HTML-escape stderr a bit so it renders
               sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' "$ERR"
               echo '</pre>'
             } > "$OUT"
+            WROTE_REPORT=no
           fi
 
           echo "exit_code=$EXIT" >> "$GITHUB_OUTPUT"
+          echo "wrote_report=$WROTE_REPORT" >> "$GITHUB_OUTPUT"
 
       - name: Show artifacts dir (debug)
         if: ${{ always() }}
-        run: ls -lah artifacts && (head -n 20 artifacts/a11y-stderr.log || true) && (head -n 20 artifacts/a11y-report.html || true)
+        run: |
+          ls -lah artifacts || true
+          echo "--- stderr (first 40 lines) ---"
+          head -n 40 artifacts/a11y-stderr.log || true
+          echo "--- report (first 40 lines) ---"
+          head -n 40 artifacts/a11y-report.html || true
 
       - name: Upload a11y artifacts
         if: ${{ always() }}
@@ -100,12 +107,13 @@ jobs:
           retention-days: 7
 
       - name: Fail on Pa11y violations
-        if: ${{ steps.pa11y.outputs.exit_code != '0' }}
+        # Only fail if Pa11y actually set a non-zero exit code
+        if: ${{ steps.pa11y.outputs.exit_code != '' && steps.pa11y.outputs.exit_code != '0' }}
         run: |
           echo "Pa11y exit code: ${{ steps.pa11y.outputs.exit_code }}"
           exit 1
+      # ---------- end Pa11y block ----------
 
-       
       - name: Link check (lychee)
         uses: lycheeverse/lychee-action@v1
         with:
@@ -125,5 +133,3 @@ jobs:
           configPath: ./lighthouserc.json
           uploadArtifacts: true
           temporaryPublicStorage: true
-
-
