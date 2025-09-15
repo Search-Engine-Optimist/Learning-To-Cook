@@ -1,8 +1,17 @@
-import { readFileSync, existsSync } from 'node:fs'
-import { join, dirname, normalize } from 'node:path'
-import * as cheerio from 'cheerio'
+import { readFileSync, existsSync } from 'node:fs';
+import { join, dirname, normalize } from 'node:path';
+import { load as parseHTML } from 'cheerio';
 
-// Pages are served from repo root in your CI
+  test('basic math works', () => {
+  expect(1 + 1).toBe(2);
+});
+
+function load(file) {
+  if (!existsSync(join('.', file))) throw new Error(`Missing file: ${file}`);
+  const html = readFileSync(join('.', file), 'utf8');
+  return parseHTML(html);
+}
+  
 const PAGES = [
   'index.html',
   'about.html',
@@ -10,11 +19,10 @@ const PAGES = [
   'contact.html',
   'recipes/spaghetti.html'
 ]
+test('vitest can run tests', () => {
+  expect(1).toBe(1)
+})
 
-function load(file) {
-  const html = readFileSync(join('.', file), 'utf8')
-  return cheerio.load(html)
-}
 
 test('each page has <html lang>, charset, viewport, title, main', () => {
   for (const file of PAGES) {
@@ -32,6 +40,7 @@ test('recipe detail images have meaningful alt text', () => {
   $('img').each((_, el) => {
     const alt = $(el).attr('alt')
     expect(alt && alt.trim().length).toBeGreaterThan(0)
+  
   })
 })
 

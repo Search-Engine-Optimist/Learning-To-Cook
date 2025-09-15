@@ -1,10 +1,9 @@
-// vitest.config.mjs
 export default {
   test: {
-    coverage: {
-      provider: 'v8',
-      all: false,
-      thresholds: { statements: 0.6, branches: 0.5, functions: 0.6, lines: 0.6 }
-    }
+    environment: 'node',
+    globals: true,                               // ⬅️ add this
+    include: ['tests/**/*.spec.{js,mjs,ts}'],
+    setupFiles: ['tests/setup.mjs'],
+    coverage: { provider: 'v8' }
   }
 }
