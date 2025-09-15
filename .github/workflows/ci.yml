@@ -40,7 +40,7 @@ jobs:
           if apt-cache policy libasound2t64 >/dev/null 2>&1; then
             ASOUND=libasound2t64
           else
-            ASOUND=libasound2
+            ASOUND=libasound2t64
           fi
           sudo apt-get install -y \
             ca-certificates fonts-liberation xdg-utils \
