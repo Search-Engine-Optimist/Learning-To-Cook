@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname, normalize } from 'node:path';
-import cheerio from 'cheerio';
+import { load as parseHTML } from 'cheerio';
 
   test('basic math works', () => {
   expect(1 + 1).toBe(2);
@@ -9,7 +9,7 @@ import cheerio from 'cheerio';
 function load(file) {
   if (!existsSync(join('.', file))) throw new Error(`Missing file: ${file}`);
   const html = readFileSync(join('.', file), 'utf8');
-  return cheerio.load(html);
+  return parseHTML(html);
 }
   
 const PAGES = [
