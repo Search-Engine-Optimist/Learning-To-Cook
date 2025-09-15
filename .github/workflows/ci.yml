@@ -57,25 +57,54 @@ jobs:
       - name: Prepare artifacts dir
         run: mkdir -p artifacts
 
-      - name: Pa11y (HTML report)
+           - name: Prepare artifacts dir
+        run: mkdir -p artifacts
+
+      - name: Pa11y (HTML report with fallback)
         id: pa11y
         shell: bash
         run: |
           set +e
-          npx pa11y-ci --config pa11yci.json --reporter html > artifacts/a11y-report.html
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          OUT="artifacts/a11y-report.html"
+          ERR="artifacts/a11y-stderr.log"
+          TMP="$(mktemp)"
 
-      - name: Upload a11y report
+          # Try to produce HTML report to a temp file; capture stderr separately
+          npx pa11y-ci --config pa11yci.json --reporter html > "$TMP" 2> "$ERR"
+          EXIT=$?
+
+          # If HTML was produced, move it into place; otherwise wrap stderr as minimal HTML
+          if [ -s "$TMP" ]; then
+            mv "$TMP" "$OUT"
+          else
+            {
+              echo '<!doctype html><meta charset="utf-8"><title>Pa11y error</title><h1>Pa11y run failed</h1><pre>'
+              # HTML-escape stderr a bit so it renders
+              sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' "$ERR"
+              echo '</pre>'
+            } > "$OUT"
+          fi
+
+          echo "exit_code=$EXIT" >> "$GITHUB_OUTPUT"
+
+      - name: Show artifacts dir (debug)
+        if: ${{ always() }}
+        run: ls -lah artifacts && (head -n 20 artifacts/a11y-stderr.log || true) && (head -n 20 artifacts/a11y-report.html || true)
+
+      - name: Upload a11y artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: a11y-report
-          path: artifacts/a11y-report.html
+          name: a11y-artifacts
+          path: artifacts/
           retention-days: 7
 
       - name: Fail on Pa11y violations
         if: ${{ steps.pa11y.outputs.exit_code != '0' }}
-        run: exit 1
+        run: |
+          echo "Pa11y exit code: ${{ steps.pa11y.outputs.exit_code }}"
+          exit 1
+
        
       - name: Link check (lychee)
         uses: lycheeverse/lychee-action@v1
