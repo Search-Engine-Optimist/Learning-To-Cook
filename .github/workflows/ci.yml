@@ -115,7 +115,7 @@ jobs:
       # ---------- end Pa11y block ----------
 
       - name: Link check (lychee)
-        uses: lycheeverse/lychee-action@v1
+        uses: lycheeverse/lychee-action@v2
         with:
           args: --config lychee.toml --exclude-file .lycheeignore .
         env:
