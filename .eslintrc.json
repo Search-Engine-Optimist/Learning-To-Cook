@@ -1,13 +1,30 @@
 {
   "root": true,
-  "env": { "browser": true, "es2022": true },
-  "extends": ["eslint:recommended"],
-  "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "extends": [
+    "eslint:recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
   "rules": {
-    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "no-console": "off"
   },
-  "ignorePatterns": ["node_modules/", "artifacts/", "dist/"],
+  "ignorePatterns": [
+    "node_modules/",
+    "artifacts/",
+    "dist/"
+  ],
   "overrides": [
     {
       "files": [
@@ -17,12 +34,20 @@
         "*.config.mjs",
         "*.config.js"
       ],
-      "env": { "node": true }
+      "env": {
+        "node": true
+      }
     },
     {
-      "files": ["tests/**/*.{js,mjs,ts}"],
-      "env": { "node": true },
-      "parserOptions": { "sourceType": "module" },
+      "files": [
+        "tests/**/*.{js,mjs,ts}"
+      ],
+      "env": {
+        "node": true
+      },
+      "parserOptions": {
+        "sourceType": "module"
+      },
       "globals": {
         "test": "readonly",
         "expect": "readonly",
