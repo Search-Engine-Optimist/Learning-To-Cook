@@ -14,11 +14,21 @@
     }
   },
   "urls": [
-    { "url": "http://127.0.0.1:8080/index.html" },
-    { "url": "http://127.0.0.1:8080/about.html" },
-    { "url": "http://127.0.0.1:8080/recipes.html" },
-    { "url": "http://127.0.0.1:8080/contact.html" },
-    { "url": "http://127.0.0.1:8080/recipes/spaghetti.html" }
+    {
+      "url": "http://127.0.0.1:8080/index.html"
+    },
+    {
+      "url": "http://127.0.0.1:8080/about.html"
+    },
+    {
+      "url": "http://127.0.0.1:8080/recipes.html"
+    },
+    {
+      "url": "http://127.0.0.1:8080/contact.html"
+    },
+    {
+      "url": "http://127.0.0.1:8080/recipes/spaghetti.html"
+    }
   ],
   "concurrency": 2
 }
