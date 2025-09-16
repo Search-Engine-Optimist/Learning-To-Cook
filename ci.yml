@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  link_lint_a11y_perf:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm install --no-audit --no-fund
+
+      - name: ESLint (npx)
+        run: npx eslint@8.57.0 . --ext .js,.mjs,.cjs --max-warnings=0
+
+      - name: Prettier formatting check
+        run: npm run prettier:check
+
+      - name: Tests (Vitest)
+        run: npm run test:coverage
+
+      # -------- Chromium system libs (Ubuntu 24.04 safe set) --------
+      - name: Install Chromium deps (for Pa11y/Lighthouse)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          # Select correct ALSA package on noble
+          if apt-cache policy libasound2t64 >/dev/null 2>&1; then
+            ASOUND=libasound2t64
+          else
+            ASOUND=libasound2
+          fi
+          echo "Using ALSA package: $ASOUND"
+          sudo apt-get install -y             ca-certificates fonts-liberation xdg-utils             libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libgtk-3-0             libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2             libxss1 libxtst6 libgbm1 libxshmfence1 libdrm2 libxkbcommon0 libxfixes3             libpango-1.0-0 libpangocairo-1.0-0 "$ASOUND"
+
+      # -------- Serve your site from repo ROOT --------
+      - name: Start static server
+        run: python3 -m http.server 8080 --directory . &
+
+      - name: Wait for server
+        run: npx wait-on http://127.0.0.1:8080/index.html
+
+      # -------- Pa11y: smoke + full run with robust artifacts --------
+      - name: Prepare artifacts dir
+        run: mkdir -p artifacts
+
+      # Quick smoke to surface launch/network errors early (JSON)
+      - name: Pa11y smoke (index only)
+        id: smoke
+        shell: bash
+        run: |
+          set +e
+          npx pa11y http://127.0.0.1:8080/index.html --reporter json > artifacts/pa11y-smoke.json 2> artifacts/pa11y-smoke-stderr.log
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Show smoke outputs (debug)
+        if: ${{ always() }}
+        run: |
+          echo "--- smoke stderr (first 40 lines) ---"
+          head -n 40 artifacts/pa11y-smoke-stderr.log || true
+          echo "--- smoke json (first 40 lines) ---"
+          head -n 40 artifacts/pa11y-smoke.json || true
+
+      # Full CI run against all pages with fallback HTML if it crashes
+      - name: Pa11y (HTML report with debug)
+        id: pa11y
+        shell: bash
+        run: |
+          set +e
+          OUT="artifacts/a11y-report.html"
+          ERR="artifacts/a11y-stderr.log"
+          TMP="$(mktemp)"
+          npx pa11y-ci --config pa11yci.json --reporter html > "$TMP" 2> "$ERR"
+          EXIT=$?
+          if [ -s "$TMP" ]; then
+            mv "$TMP" "$OUT"
+            WROTE_REPORT=yes
+          else
+            {
+              echo '<!doctype html><meta charset="utf-8"><title>Pa11y error</title><h1>Pa11y run failed</h1><pre>'
+              sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' "$ERR"
+              echo '</pre>'
+            } > "$OUT"
+            WROTE_REPORT=no
+          fi
+          echo "exit_code=$EXIT" >> "$GITHUB_OUTPUT"
+          echo "wrote_report=$WROTE_REPORT" >> "$GITHUB_OUTPUT"
+
+      - name: Show artifacts dir (debug)
+        if: ${{ always() }}
+        run: |
+          ls -lah artifacts || true
+          echo "--- pa11y stderr (first 60 lines) ---"
+          head -n 60 artifacts/a11y-stderr.log || true
+          echo "--- pa11y report (first 60 lines) ---"
+          head -n 60 artifacts/a11y-report.html || true
+
+      - name: Upload a11y artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-artifacts
+          path: artifacts/
+          retention-days: 7
+
+      - name: Fail on Pa11y violations
+        if: ${{ steps.pa11y.outputs.exit_code != '' && steps.pa11y.outputs.exit_code != '0' }}
+        run: |
+          echo "Pa11y exit code: ${{ steps.pa11y.outputs.exit_code }}"
+          exit 1
+
+      - name: Link check (lychee)
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --config lychee.toml --exclude-file .lycheeignore .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lighthouse CI (budgets)
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            http://127.0.0.1:8080/index.html
+            http://127.0.0.1:8080/about.html
+            http://127.0.0.1:8080/recipes.html
+            http://127.0.0.1:8080/contact.html
+            http://127.0.0.1:8080/recipes/spaghetti.html
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
