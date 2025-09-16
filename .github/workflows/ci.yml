@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20          # Node 20 avoids File/polyfill issues in tests
+          node-version: 20          # Node 20 avoids File/polyfill issues for tests
           cache: npm
 
       - name: Install deps
