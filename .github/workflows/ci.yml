@@ -104,6 +104,16 @@ jobs:
           name: a11y-artifacts
           path: artifacts/
           retention-days: 7
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+        
+      - name: coverage
+    path: coverage/**
+    if-no-files-found: warn   # or 'error' if you want the job to fail when missing
+    retention-days: 7
+
 
       - name: Fail on Pa11y violations
         # Only fail if Pa11y actually set a non-zero exit code
