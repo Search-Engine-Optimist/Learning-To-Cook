@@ -1,8 +1,4 @@
 name: CI
-- uses: actions/setup-node@v4
-  with: { node-version: 20 }
-- run: npm ci
-- run: npx eslint . --max-warnings=0
 on:
 push:
 branches: [ main ]
@@ -15,8 +11,9 @@ contents: read
 steps:
 - uses: actions/checkout@v4
 - uses: actions/setup-node@v4
-with:
-node-version: 20          # Node 20 avoids File/polyfill issues for tests
+  with: node-version:20          
+- run: npm ci
+- run: npx eslint . --max-warnings=0
 - run: npm run lint
 cache: npm
 - name: Install deps
