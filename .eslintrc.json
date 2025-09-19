@@ -1,3 +1,25 @@
+
+{
+  "overrides": [
+    {
+      "files": ["tests/**/*.{js,mjs,cjs}"],
+      "globals": { "test": "readonly", "expect": "readonly" }
+    }
+  ]
+}
+eslint.config.js (ESLint 9 flat):
+
+js
+Copy code
+export default [
+  {
+    files: ["tests/**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      globals: { test: "readonly", expect: "readonly" }
+    }
+  }
+]
+
 {
 "root": true,
 "env": {
