@@ -9,7 +9,9 @@
     "a11y": "run-p -r serve:static a11y:run",
     "a11y:run": "wait-on http://127.0.0.1:8080/index.html && pa11y-ci",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "format": "prettier . --write --ignore-unknown",
+    "format:check": "prettier . --check --ignore-unknown"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^2.1.3",
