@@ -1,6 +1,17 @@
 {
 "root": true,
-"env": {
+"env": { "es2022": true, "node": true },
+"parserOptions": { "ecmaVersion": "latest", "sourceType": "module" },
+"extends": ["eslint:recommended"],
+"overrides": [
+{
+      "files": ["tests/**/*.{js,mjs,cjs}"],
+      "env": { "jest": true },
+      "globals": { "test": "readonly", "expect": "readonly" }
+    }
+  ],
+  "ignorePatterns": ["coverage/", ".lighthouseci/", "artifacts/"]
+}
 "browser": true,
 "es2022": true
 },
