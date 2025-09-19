@@ -1,4 +1,20 @@
+# Default: treat text files as text and use LF in the working tree
+* text=auto eol=lf
+
+# Mark obvious binaries so Git never tries to “fix” them
+*.png  -text
+*.jpg  -text
+*.jpeg -text
+*.gif  -text
+*.pdf  -text
+*.ico  -text
+*.zip  -text
 * text=auto
 *.html text eol=lf
 *.css  text eol=lf
 *.md   text eol=lf
+
+# Allow CRLF for Windows-only scripts
+*.bat eol=crlf
+*.cmd eol=crlf
+*.ps1 eol=crlf
