@@ -11,7 +11,7 @@ const PAGES = [
 ];
 function load(file) {
 const full = join('.', file);
-if (!existsSync(full)) throw new Error(`Missing file: ${file}`);
+if (!existsSync(full)) {throw new Error(`Missing file: ${file}`);}
 const html = readFileSync(full, 'utf8');
 return parseHTML(html);
 }
@@ -41,7 +41,7 @@ test('each page has <html lang>, charset, viewport, title, main', () => {
    $('input,textarea,select').each((_, el) => {
    const id = $(el).attr('id');
    // If an input has an id, a corresponding label[for] should exist
-   if (id) expect($(`label[for="${id}"]`).length).toBeGreaterThan(0);
+   if (id) {expect($(`label[for="${id}"]`).length).toBeGreaterThan(0);}
    });
    });
    test('headings don\'t skip levels on About', () => {
@@ -56,9 +56,9 @@ test('each page has <html lang>, charset, viewport, title, main', () => {
    /^(https?:)?\/\//i.test(u) || u.startsWith('data:') || u.startsWith('blob:');
    const stripQueryHash = (u = '') => u.split('#')[0].split('?')[0];
    function checkCandidate(relUrl, pageFile, errors) {
-   if (!relUrl) return;
+   if (!relUrl) {return;}
    const url = stripQueryHash(relUrl.trim());
-   if (!url || isExternal(url)) return;
+   if (!url || isExternal(url)) {return;}
    const baseDir = dirname(pageFile);
    const absPath = url.startsWith('/')
    ? join('.', url.replace(/^\/+/, ''))
@@ -82,5 +82,5 @@ test('each page has <html lang>, charset, viewport, title, main', () => {
    }
    });
    }
-   if (allErrors.length) throw new Error('\n' + allErrors.join('\n'));
+   if (allErrors.length) {throw new Error('\n' + allErrors.join('\n'));}
    });
