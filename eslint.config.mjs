@@ -20,6 +20,7 @@ export default [
   {
     ignores: ["coverage/", ".lighthouseci/", "artifacts/"]
   }
+
   languageOptions: {
   ecmaVersion: "latest",
   sourceType: "module",
@@ -30,5 +31,4 @@ rules: {
   "no-console": "warn",
   "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
 }
-
 ];
