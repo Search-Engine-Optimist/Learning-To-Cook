@@ -1,3 +1,5 @@
 node_modules/
 artifacts/
 dist/
+.eslintrc.json
+eslint.config.js
