@@ -2,6 +2,12 @@
   "name": "learning-to-cook",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "prettier": {
+    "endOfLine": "lf"
+  },
   "scripts": {
     "prettier:check": "prettier --check \"**/*.{html,css,js,mjs,json,md}\"",
     "prettier:write": "prettier --write \"**/*.{html,css,js,mjs,json,md}\"",
