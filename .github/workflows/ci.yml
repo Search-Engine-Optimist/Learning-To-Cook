@@ -29,7 +29,7 @@ jobs:
       - name: Prettier formatting check
         run: npx prettier . --check --ignore-unknown
 
-      # --- Tests ---
+      # --- Tests (generates coverage/ ) ---
       - name: Tests (Vitest)
         run: npx vitest run --coverage
 
@@ -106,7 +106,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # --- Lighthouse budgets (Option A: action uploads its own artifacts) ---
+      # --- Lighthouse budgets (the action uploads its own artifacts) ---
       - name: Lighthouse CI (budgets)
         uses: treosh/lighthouse-ci-action@v11
         with:
@@ -117,11 +117,10 @@ jobs:
             http://127.0.0.1:8080/contact.html
             http://127.0.0.1:8080/recipes/spaghetti.html
           configPath: ./lighthouserc.json
-          uploadArtifacts: true          # ← this uploads .lighthouseci/** for you
-          temporaryPublicStorage: true   # optional: also pushes to LH temp storage
+          uploadArtifacts: true
+          temporaryPublicStorage: true
 
-      # (No separate manual upload step here to avoid duplicates)
-
+      # --- Upload coverage produced by Vitest ---
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@v4
