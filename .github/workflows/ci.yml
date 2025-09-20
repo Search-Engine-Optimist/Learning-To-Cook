@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm               # ✅ cache belongs here
+          cache: npm
 
       - name: Install deps
         run: npm ci --no-audit --no-fund
@@ -63,17 +63,20 @@ jobs:
         run: npx wait-on http://127.0.0.1:8080/index.html
 
       # --- A11y (pa11y-ci) ---
-      - name: Prepare artifacts dir
-        run: mkdir -p artifacts
-
-      - name: Run pa11y-ci (JSON + stderr)
+      - name: Run pa11y-ci (create artifacts + capture exit)
         id: pa11y
         shell: bash
         run: |
+          set -euxo pipefail
+          ARTIFACTS_DIR="${{ github.workspace }}/artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
           set +e
-          npx pa11y-ci --config pa11yci.json --json > artifacts/a11y-report.json 2> artifacts/a11y-stderr.log
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
-        continue-on-error: true
+          npx pa11y-ci --config pa11yci.json --json \
+            > "$ARTIFACTS_DIR/a11y-report.json" \
+            2> "$ARTIFACTS_DIR/a11y-stderr.log"
+          EXIT=$?
+          set -e
+          echo "exit_code=$EXIT" >> "$GITHUB_OUTPUT"
 
       - name: Upload a11y artifacts
         if: always()
@@ -118,5 +121,14 @@ jobs:
         with:
           name: lighthouse
           path: .lighthouseci/**
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/**
           if-no-files-found: warn
           retention-days: 7
