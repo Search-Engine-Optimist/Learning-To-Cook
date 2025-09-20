@@ -11,7 +11,7 @@ export default [
       globals: globals.node
     },
     rules: {
-      // Add custom rules here if needed
+      // Add custom rules here
     }
   },
   {
