@@ -23,8 +23,8 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       # --- Lint & Format ---
-      - name: ESLint (npx, pinned 8.57.1)
-        run: npx --yes eslint@8.57.1 . --ext .js,.mjs,.cjs --max-warnings=0
+      - name: ESLint
+        run: npm run lint
 
       - name: Prettier formatting check
         run: npx prettier . --check --ignore-unknown
