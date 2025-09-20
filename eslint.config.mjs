@@ -1,8 +1,6 @@
-import js from "@eslint/js";
 import globals from "globals";
 
 export default [
-  js.configs.recommended,
   {
     files: ["**/*.{js,mjs,cjs}"],
     languageOptions: {
@@ -10,7 +8,13 @@ export default [
       sourceType: "module",
       globals: globals.node
     },
-    rules: {}
+    rules: {
+      "no-unused-vars": "error",
+      "no-undef": "error",
+      "no-console": "warn",
+      "eqeqeq": "error",
+      "curly": "error"
+    }
   },
   {
     files: ["tests/**/*.{js,mjs,cjs}"],
