@@ -24,7 +24,8 @@ jobs:
 
       # --- Lint & Format ---
       - name: ESLint (npx, pinned 8.57.1)
-        run: npx --yes eslint@8.57.1 . --ext .js,.mjs,.cjs --max-warnings=0
+        run: npx --yes eslint@8.57.1 "**/*.{js,mjs,cjs}" --max-warnings=0
+
 
       - name: Prettier formatting check
         run: npx prettier . --check --ignore-unknown
