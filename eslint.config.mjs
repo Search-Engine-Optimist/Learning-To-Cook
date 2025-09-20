@@ -10,7 +10,9 @@ export default [
       sourceType: "module",
       globals: globals.node
     },
-    rules: {}
+    rules: {
+      // Add custom rules here
+    }
   },
   {
     files: ["tests/**/*.{js,mjs,cjs}"],
