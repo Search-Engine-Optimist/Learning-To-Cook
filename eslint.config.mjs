@@ -6,26 +6,26 @@ export default [
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      globals: globals.node
+      globals: globals.node,
     },
     rules: {
       "no-unused-vars": "error",
       "no-undef": "error",
       "no-console": "warn",
-      "eqeqeq": "error",
-      "curly": "error"
-    }
+      eqeqeq: "error",
+      curly: "error",
+    },
   },
   {
     files: ["tests/**/*.{js,mjs,cjs}"],
     languageOptions: {
       globals: {
         test: "readonly",
-        expect: "readonly"
-      }
-    }
+        expect: "readonly",
+      },
+    },
   },
   {
-    ignores: ["coverage/", ".lighthouseci/", "artifacts/"]
-  }
+    ignores: ["coverage/", ".lighthouseci/", "artifacts/"],
+  },
 ];
