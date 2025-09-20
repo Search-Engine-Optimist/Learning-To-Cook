@@ -1,151 +1,122 @@
 name: CI
+
 on:
-push:
-branches: [ main ]
-pull_request:
+  push:
+    branches: [ main ]
+  pull_request:
+
 jobs:
-link_lint_a11y_perf:
-runs-on: ubuntu-latest
-permissions:
-contents: read
-steps:
-- uses: actions/checkout@v4
-- uses: actions/setup-node@v4
-  with: node-version:20          
-- run: npm ci
-- run: npx eslint . --max-warnings=0
-- run: npm run lint
-cache: npm
-- name: Install deps
-run: npm install --no-audit --no-fund
-- name: ESLint (npx)
-- run: npx --yes eslint@8.57.1 . --ext .js,.mjs,.cjs --max-warnings=0
-- name: Prettier formatting check
-run: npm run prettier:check
-- name: Tests (Vitest)
-run: npm run test:coverage
-- name: Install Chromium deps (for Pa11y/Lighthouse)
-shell: bash
-run: |
-set -euxo pipefail
-sudo apt-get update
-# Pick the correct ALSA package for this Ubuntu version (24.04 uses libasound2t64)
-if apt-cache policy libasound2t64 >/dev/null 2>&1; then
-ASOUND=libasound2t64
-else
-ASOUND=libasound2
-fi
-echo "Using ALSA package: $ASOUND"
-sudo apt-get install -y \
-ca-certificates fonts-liberation xdg-utils \
-libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libgtk-3-0 \
-libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 \
-libxss1 libxtst6 libgbm1 libxshmfence1 libdrm2 libxkbcommon0 "$ASOUND"
-# Serve from the REPO ROOT (you don't have ./dist)
-- name: Start static server
-run: python3 -m http.server 8080 --directory . &
-- name: Wait for server
-run: npx wait-on http://127.0.0.1:8080/index.html
-# ---------- Pa11y: robust HTML artifact with stderr fallback ----------
-- name: Prepare artifacts dir
-run: mkdir -p artifacts
-- name: Pa11y (HTML report with debug)
-id: pa11y
-shell: bash
-run: |
-set +e
-OUT="artifacts/a11y-report.html"
-ERR="artifacts/a11y-stderr.log"
-TMP="$(mktemp)"
-# Run Pa11y: HTML -> temp, stderr -> log
-npx pa11y-ci --config pa11yci.json --reporter html > "$TMP" 2> "$ERR"
-EXIT=$?
-# If HTML exists, move it; otherwise wrap stderr as HTML so you can open it
-if [ -s "$TMP" ]; then
-mv "$TMP" "$OUT"
-WROTE_REPORT=yes
-else
-{
-echo '<!doctype html>
-<meta charset="utf-8">
-<title>Pa11y error</title>
-<h1>Pa11y run failed</h1>
-<pre>'
-              sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' "$ERR"
-              echo '</pre>
-'
-} > "$OUT"
-WROTE_REPORT=no
-fi
-echo "exit_code=$EXIT" >> "$GITHUB_OUTPUT"
-echo "wrote_report=$WROTE_REPORT" >> "$GITHUB_OUTPUT"
-- name: Show artifacts dir (debug)
-if: ${{ always() }}
-run: |
-ls -lah artifacts || true
-echo "--- stderr (first 40 lines) ---"
-head -n 40 artifacts/a11y-stderr.log || true
-echo "--- report (first 40 lines) ---"
-head -n 40 artifacts/a11y-report.html || true
-# Generate A11Y artifacts from pa11y-ci
-- name: Run pa11y-ci (produce JSON + stderr)
-run: | mkdir -p artifacts
-npx pa11y-ci --json > artifacts/a11y-report.json 2> artifacts/a11y-stderr.log
-# If you want the job to keep going even if pa11y finds issues:
-continue-on-error: true
-# Safely preview the files (don’t error if they’re missing)
-- name: Show a11y summary (first 40 lines)
-if: always()
-run: |
-echo "--- stderr (first 40 lines) ---"
-if [ -f artifacts/a11y-stderr.log ]; then head -n 40 artifacts/a11y-stderr.log; else echo "no a11y stderr"; fi
-echo "--- report (first 40 lines) ---"
-if [ -f artifacts/a11y-report.json ]; then head -n 40 artifacts/a11y-report.json; else echo "no a11y report"; fi
-# Upload the artifacts folder you just created
-- name: Upload a11y artifacts
-if: always()
-uses: actions/upload-artifact@v4
-with:
-name: a11y
-path: artifacts/**
-if-no-files-found: warn
-- name: Upload a11y artifacts
-if: ${{ always() }}
-uses: actions/upload-artifact@v4
-with:
-name: a11y-artifacts
-path: artifacts/
-retention-days: 7
-- name: Upload coverage
-if: always()
-uses: actions/upload-artifact@v4
-with:
-- name: coverage
-path: coverage/**
-if-no-files-found: warn   # or 'error' if you want the job to fail when missing
-retention-days: 7
-- name: Fail on Pa11y violations
-# Only fail if Pa11y actually set a non-zero exit code
-if: ${{ steps.pa11y.outputs.exit_code != '' && steps.pa11y.outputs.exit_code != '0' }}
-run: |
-echo "Pa11y exit code: ${{ steps.pa11y.outputs.exit_code }}"
-exit 1
-# ---------- end Pa11y block ----------
-- name: Link check (lychee)
-uses: lycheeverse/lychee-action@v1
-with:
-args: --config lychee.toml --exclude-file .lycheeignore .
-env:
-GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-- name: Lighthouse CI (budgets)
-uses: treosh/lighthouse-ci-action@v11
-with:
-urls: |
-http://127.0.0.1:8080/index.html
-http://127.0.0.1:8080/about.html
-http://127.0.0.1:8080/recipes.html
-http://127.0.0.1:8080/contact.html
-http://127.0.0.1:8080/recipes/spaghetti.html
-configPath: ./lighthouserc.json
-uploadArtifacts: true
-temporaryPublicStorage: true
+  link_lint_a11y_perf:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm               # ✅ cache belongs here
+
+      - name: Install deps
+        run: npm ci --no-audit --no-fund
+
+      # --- Lint & Format ---
+      - name: ESLint (npx, pinned 8.57.1)
+        run: npx --yes eslint@8.57.1 . --ext .js,.mjs,.cjs --max-warnings=0
+
+      - name: Prettier formatting check
+        run: |
+          if npm run -s | grep -q '^  prettier:check'; then
+            npm run prettier:check
+          else
+            npx prettier . --check --ignore-unknown
+          fi
+
+      # --- Tests ---
+      - name: Tests (Vitest)
+        run: |
+          if npm run -s | grep -q '^  test:coverage'; then
+            npm run test:coverage
+          else
+            npx vitest run --coverage
+          fi
+
+      # --- Deps for headless Chromium (Pa11y/Lighthouse) ---
+      - name: Install Chromium deps (for Pa11y/Lighthouse)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          if apt-cache policy libasound2t64 >/dev/null 2>&1; then ASOUND=libasound2t64; else ASOUND=libasound2; fi
+          sudo apt-get install -y \
+            ca-certificates fonts-liberation xdg-utils \
+            libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libgtk-3-0 \
+            libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 \
+            libxss1 libxtst6 libgbm1 libxshmfence1 libdrm2 libxkbcommon0 "$ASOUND"
+
+      - name: Start static server
+        run: python3 -m http.server 8080 --directory . &
+
+      - name: Wait for server
+        run: npx wait-on http://127.0.0.1:8080/index.html
+
+      # --- A11y (pa11y-ci) ---
+      - name: Prepare artifacts dir
+        run: mkdir -p artifacts
+
+      - name: Run pa11y-ci (JSON + stderr)
+        id: pa11y
+        shell: bash
+        run: |
+          set +e
+          npx pa11y-ci --config pa11yci.json --json > artifacts/a11y-report.json 2> artifacts/a11y-stderr.log
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: Upload a11y artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y
+          path: artifacts/**
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Fail on Pa11y violations
+        if: ${{ steps.pa11y.outputs.exit_code != '' && steps.pa11y.outputs.exit_code != '0' }}
+        run: |
+          echo "Pa11y exit code: ${{ steps.pa11y.outputs.exit_code }}"
+          exit 1
+
+      # --- Link check ---
+      - name: Link check (lychee)
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --config lychee.toml --exclude-file .lycheeignore .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- Lighthouse budgets ---
+      - name: Lighthouse CI (budgets)
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            http://127.0.0.1:8080/index.html
+            http://127.0.0.1:8080/about.html
+            http://127.0.0.1:8080/recipes.html
+            http://127.0.0.1:8080/contact.html
+            http://127.0.0.1:8080/recipes/spaghetti.html
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: .lighthouseci/**
+          if-no-files-found: warn
+          retention-days: 7
