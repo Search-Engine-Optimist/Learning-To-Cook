@@ -1,16 +1,15 @@
 [
-{
-"path": "/*",
-"resourceSizes": [
-{ "resourceType": "script",  "budget": 150 },
-{ "resourceType": "image",   "budget": 600 },
-{ "resourceType": "total",   "budget": 900 }
-],
-"timings": [
-{ "metric": "first-contentful-paint",   "budget": 1800 },
-{ "metric": "largest-contentful-paint", "budget": 2500 },
-{ "metric": "total-blocking-time",      "budget": 200 }
+  {
+    "path": "/*",
+    "resourceSizes": [
+      { "resourceType": "script", "budget": 150 },
+      { "resourceType": "image", "budget": 600 },
+      { "resourceType": "total", "budget": 900 }
+    ],
+    "timings": [
+      { "metric": "first-contentful-paint", "budget": 1800 },
+      { "metric": "largest-contentful-paint", "budget": 2500 },
+      { "metric": "total-blocking-time", "budget": 200 }
+    ]
+  }
 ]
-}
-]
-

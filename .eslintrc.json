@@ -1,63 +1,55 @@
 {
-"root": true,
-"env": {
-"browser": true,
-"es2022": true
-},
-"extends": [
-"eslint:recommended"
-],
-"parserOptions": {
-"ecmaVersion": 2022,
-"sourceType": "module"
-},
-"rules": {
-"no-unused-vars": [
-"warn",
-{
-"argsIgnorePattern": "^_"
-}
-],
-"no-console": "off"
-},
-"ignorePatterns": [
-"node_modules/",
-"artifacts/",
-"dist/"
-],
-"overrides": [
-{
-"files": [
-"prettier.config.cjs",
-"vitest.config.*",
-"*.config.cjs",
-"*.config.mjs",
-"*.config.js"
-],
-"env": {
-"node": true
-}
-},
-{
-"files": [
-"tests/**/*.{js,mjs,ts}"
-],
-"env": {
-"node": true
-},
-"parserOptions": {
-"sourceType": "module"
-},
-"globals": {
-"test": "readonly",
-"expect": "readonly",
-"describe": "readonly",
-"it": "readonly",
-"beforeAll": "readonly",
-"afterAll": "readonly",
-"beforeEach": "readonly",
-"afterEach": "readonly"
-}
-}
-]
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "no-console": "off"
+  },
+  "ignorePatterns": ["node_modules/", "artifacts/", "dist/"],
+  "overrides": [
+    {
+      "files": [
+        "prettier.config.cjs",
+        "vitest.config.*",
+        "*.config.cjs",
+        "*.config.mjs",
+        "*.config.js"
+      ],
+      "env": {
+        "node": true
+      }
+    },
+    {
+      "files": ["tests/**/*.{js,mjs,ts}"],
+      "env": {
+        "node": true
+      },
+      "parserOptions": {
+        "sourceType": "module"
+      },
+      "globals": {
+        "test": "readonly",
+        "expect": "readonly",
+        "describe": "readonly",
+        "it": "readonly",
+        "beforeAll": "readonly",
+        "afterAll": "readonly",
+        "beforeEach": "readonly",
+        "afterEach": "readonly"
+      }
+    }
+  ]
 }
