@@ -27,21 +27,11 @@ jobs:
         run: npx --yes eslint@8.57.1 . --ext .js,.mjs,.cjs --max-warnings=0
 
       - name: Prettier formatting check
-        run: |
-          if npm run -s | grep -q '^  prettier:check'; then
-            npm run prettier:check
-          else
-            npx prettier . --check --ignore-unknown
-          fi
+        run: npx prettier . --check --ignore-unknown
 
       # --- Tests ---
       - name: Tests (Vitest)
-        run: |
-          if npm run -s | grep -q '^  test:coverage'; then
-            npm run test:coverage
-          else
-            npx vitest run --coverage
-          fi
+        run: npx vitest run --coverage
 
       # --- Deps for headless Chromium (Pa11y/Lighthouse) ---
       - name: Install Chromium deps (for Pa11y/Lighthouse)
@@ -68,14 +58,29 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          ARTIFACTS_DIR="${{ github.workspace }}/artifacts"
+          echo "CWD: $(pwd)"
+          echo "WORKSPACE: ${GITHUB_WORKSPACE}"
+
+          ARTIFACTS_DIR="${GITHUB_WORKSPACE}/artifacts"
           mkdir -p "$ARTIFACTS_DIR"
+          ls -ld "$ARTIFACTS_DIR"
+
+          # Pre-create files so redirection cannot fail
+          : > "$ARTIFACTS_DIR/a11y-report.json"
+          : > "$ARTIFACTS_DIR/a11y-stderr.log"
+
+          # Run pa11y-ci, capture exit without failing yet
           set +e
           npx pa11y-ci --config pa11yci.json --json \
             > "$ARTIFACTS_DIR/a11y-report.json" \
             2> "$ARTIFACTS_DIR/a11y-stderr.log"
           EXIT=$?
           set -e
+
+          # Show sizes so we know files exist
+          wc -c "$ARTIFACTS_DIR/a11y-report.json" || true
+          wc -c "$ARTIFACTS_DIR/a11y-stderr.log" || true
+
           echo "exit_code=$EXIT" >> "$GITHUB_OUTPUT"
 
       - name: Upload a11y artifacts
@@ -101,7 +106,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # --- Lighthouse budgets ---
+      # --- Lighthouse budgets (Option A: action uploads its own artifacts) ---
       - name: Lighthouse CI (budgets)
         uses: treosh/lighthouse-ci-action@v11
         with:
@@ -112,17 +117,10 @@ jobs:
             http://127.0.0.1:8080/contact.html
             http://127.0.0.1:8080/recipes/spaghetti.html
           configPath: ./lighthouserc.json
-          uploadArtifacts: true
-          temporaryPublicStorage: true
+          uploadArtifacts: true          # ← this uploads .lighthouseci/** for you
+          temporaryPublicStorage: true   # optional: also pushes to LH temp storage
 
-      - name: Upload Lighthouse reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse
-          path: .lighthouseci/**
-          if-no-files-found: warn
-          retention-days: 7
+      # (No separate manual upload step here to avoid duplicates)
 
       - name: Upload coverage
         if: always()
