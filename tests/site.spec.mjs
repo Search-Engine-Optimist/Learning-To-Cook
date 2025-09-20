@@ -1,24 +1,30 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname, normalize } from 'node:path';
 import { load as parseHTML } from 'cheerio';
+
 // Pages assumed to live at repo root
 const PAGES = [
-'index.html',
-'about.html',
-'recipes.html',
-'contact.html',
-'recipes/spaghetti.html'
+  'index.html',
+  'about.html',
+  'recipes.html',
+  'contact.html',
+  'recipes/spaghetti.html'
 ];
+
 function load(file) {
-const full = join('.', file);
-if (!existsSync(full)) {throw new Error(`Missing file: ${file}`);}
-const html = readFileSync(full, 'utf8');
-return parseHTML(html);
+  const full = join('.', file);
+  if (!existsSync(full)) {
+    throw new Error(`Missing file: ${file}`);
+  }
+  const html = readFileSync(full, 'utf8');
+  return parseHTML(html);
 }
+
 // Smoke test so we know the runner is alive
 test('runner smoke', () => {
-expect(1 + 1).toBe(2);
+  expect(1 + 1).toBe(2);
 });
+
 test('each page has <html lang>, charset, viewport, title, main', () => {
    for (const file of PAGES) {
    const $ = load(file);

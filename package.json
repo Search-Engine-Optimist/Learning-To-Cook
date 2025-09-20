@@ -20,6 +20,8 @@
     "format:check": "prettier . --check --ignore-unknown",
     "lint": "eslint . --ext .js,.mjs,.cjs --max-warnings=0",
     "lint:fix": "eslint . --ext .js,.mjs,.cjs --fix"
+   
+
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
