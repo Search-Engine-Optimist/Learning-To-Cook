@@ -2,6 +2,12 @@
   "name": "learning-to-cook",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "prettier": {
+    "endOfLine": "lf"
+  },
   "scripts": {
     "prettier:check": "prettier --check \"**/*.{html,css,js,mjs,json,md}\"",
     "prettier:write": "prettier --write \"**/*.{html,css,js,mjs,json,md}\"",
@@ -9,7 +15,11 @@
     "a11y": "run-p -r serve:static a11y:run",
     "a11y:run": "wait-on http://127.0.0.1:8080/index.html && pa11y-ci",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "format": "prettier . --write --ignore-unknown",
+    "format:check": "prettier . --check --ignore-unknown",
+    "lint": "eslint . --ext .js,.mjs,.cjs --max-warnings=0",
+    "lint:fix": "eslint . --ext .js,.mjs,.cjs --fix"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

@@ -16,103 +16,89 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20          # Node 20 avoids File/polyfill issues for tests
+          node-version: 20
           cache: npm
 
       - name: Install deps
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
-      - name: ESLint (npx)
-        run: npx eslint@8.57.0 . --ext .js,.mjs,.cjs --max-warnings=0
+      # --- Lint & Format ---
+      - name: ESLint
+        run: npm run lint
 
       - name: Prettier formatting check
-        run: npm run prettier:check
+        run: npx prettier . --check --ignore-unknown
 
+      # --- Tests (generates coverage/ ) ---
       - name: Tests (Vitest)
-        run: npm run test:coverage
+        run: npx vitest run --coverage
 
+      # --- Deps for headless Chromium (Pa11y/Lighthouse) ---
       - name: Install Chromium deps (for Pa11y/Lighthouse)
         shell: bash
         run: |
           set -euxo pipefail
           sudo apt-get update
-          # Pick the correct ALSA package for this Ubuntu version (24.04 uses libasound2t64)
-          if apt-cache policy libasound2t64 >/dev/null 2>&1; then
-            ASOUND=libasound2t64
-          else
-            ASOUND=libasound2
-          fi
-          echo "Using ALSA package: $ASOUND"
+          if apt-cache policy libasound2t64 >/dev/null 2>&1; then ASOUND=libasound2t64; else ASOUND=libasound2; fi
           sudo apt-get install -y \
             ca-certificates fonts-liberation xdg-utils \
             libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libgtk-3-0 \
             libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 \
             libxss1 libxtst6 libgbm1 libxshmfence1 libdrm2 libxkbcommon0 "$ASOUND"
-      # Serve from the REPO ROOT (you don't have ./dist)
+
       - name: Start static server
         run: python3 -m http.server 8080 --directory . &
 
       - name: Wait for server
         run: npx wait-on http://127.0.0.1:8080/index.html
 
-      # ---------- Pa11y: robust HTML artifact with stderr fallback ----------
-      - name: Prepare artifacts dir
-        run: mkdir -p artifacts
-
-      - name: Pa11y (HTML report with debug)
+      # --- A11y (pa11y-ci) ---
+      - name: Run pa11y-ci (create artifacts + capture exit)
         id: pa11y
         shell: bash
         run: |
+          set -euxo pipefail
+          echo "CWD: $(pwd)"
+          echo "WORKSPACE: ${GITHUB_WORKSPACE}"
+
+          ARTIFACTS_DIR="${GITHUB_WORKSPACE}/artifacts"
+          mkdir -p "$ARTIFACTS_DIR"
+          ls -ld "$ARTIFACTS_DIR"
+
+          # Pre-create files so redirection cannot fail
+          : > "$ARTIFACTS_DIR/a11y-report.json"
+          : > "$ARTIFACTS_DIR/a11y-stderr.log"
+
+          # Run pa11y-ci, capture exit without failing yet
           set +e
-          OUT="artifacts/a11y-report.html"
-          ERR="artifacts/a11y-stderr.log"
-          TMP="$(mktemp)"
-
-          # Run Pa11y: HTML -> temp, stderr -> log
-          npx pa11y-ci --config pa11yci.json --reporter html > "$TMP" 2> "$ERR"
+          npx pa11y-ci --config pa11yci.json --json \
+            > "$ARTIFACTS_DIR/a11y-report.json" \
+            2> "$ARTIFACTS_DIR/a11y-stderr.log"
           EXIT=$?
+          set -e
 
-          # If HTML exists, move it; otherwise wrap stderr as HTML so you can open it
-          if [ -s "$TMP" ]; then
-            mv "$TMP" "$OUT"
-            WROTE_REPORT=yes
-          else
-            {
-              echo '<!doctype html><meta charset="utf-8"><title>Pa11y error</title><h1>Pa11y run failed</h1><pre>'
-              sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' "$ERR"
-              echo '</pre>'
-            } > "$OUT"
-            WROTE_REPORT=no
-          fi
+          # Show sizes so we know files exist
+          wc -c "$ARTIFACTS_DIR/a11y-report.json" || true
+          wc -c "$ARTIFACTS_DIR/a11y-stderr.log" || true
 
           echo "exit_code=$EXIT" >> "$GITHUB_OUTPUT"
-          echo "wrote_report=$WROTE_REPORT" >> "$GITHUB_OUTPUT"
-
-      - name: Show artifacts dir (debug)
-        if: ${{ always() }}
-        run: |
-          ls -lah artifacts || true
-          echo "--- stderr (first 40 lines) ---"
-          head -n 40 artifacts/a11y-stderr.log || true
-          echo "--- report (first 40 lines) ---"
-          head -n 40 artifacts/a11y-report.html || true
 
       - name: Upload a11y artifacts
-        if: ${{ always() }}
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: a11y-artifacts
-          path: artifacts/
+          name: a11y
+          path: artifacts/**
+          if-no-files-found: warn
           retention-days: 7
 
       - name: Fail on Pa11y violations
-        # Only fail if Pa11y actually set a non-zero exit code
         if: ${{ steps.pa11y.outputs.exit_code != '' && steps.pa11y.outputs.exit_code != '0' }}
         run: |
           echo "Pa11y exit code: ${{ steps.pa11y.outputs.exit_code }}"
           exit 1
-      # ---------- end Pa11y block ----------
 
+      # --- Link check ---
       - name: Link check (lychee)
         uses: lycheeverse/lychee-action@v1
         with:
@@ -120,6 +106,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # --- Lighthouse budgets (the action uploads its own artifacts) ---
       - name: Lighthouse CI (budgets)
         uses: treosh/lighthouse-ci-action@v11
         with:
@@ -132,3 +119,13 @@ jobs:
           configPath: ./lighthouserc.json
           uploadArtifacts: true
           temporaryPublicStorage: true
+
+      # --- Upload coverage produced by Vitest ---
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/**
+          if-no-files-found: warn
+          retention-days: 7

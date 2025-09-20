@@ -1,9 +1,14 @@
-export default {
+// vitest.config.mjs
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
   test: {
-    environment: 'node',
-    globals: true,
-    include: ['tests/**/*.spec.{js,mjs,ts}'],
-    setupFiles: ['tests/setup.mjs'],
-    coverage: { provider: 'v8' },
-  },
-};
+    // Default environment is 'node' (good for your fs/path + cheerio tests)
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'html'],
+      reportsDirectory: 'coverage',
+      all: true
+    }
+  }
+});

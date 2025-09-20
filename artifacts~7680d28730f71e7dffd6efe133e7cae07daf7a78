@@ -1,0 +1,12 @@
+- name: Run tests with coverage
+  run: |
+    npm test -- --coverage
+    mkdir -p artifacts
+    cp -r coverage artifacts/coverage
+
+- name: Upload artifacts
+  uses: actions/upload-artifact@v4
+  with:
+    name: test-artifacts
+    path: artifacts/**
+    if-no-files-found: error

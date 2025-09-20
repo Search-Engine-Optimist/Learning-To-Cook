@@ -19,8 +19,7 @@ return parseHTML(html);
 test('runner smoke', () => {
 expect(1 + 1).toBe(2);
 });
-test('each page has 
-<html lang>, charset, viewport, title, main', () => {
+test('each page has <html lang>, charset, viewport, title, main', () => {
    for (const file of PAGES) {
    const $ = load(file);
    expect($('html[lang]').length).toBeGreaterThan(0);

@@ -1,5 +1,7 @@
 node_modules/
 artifacts/
 dist/
+coverage/
+.lighthouseci/
 .eslintrc.json
 eslint.config.js
