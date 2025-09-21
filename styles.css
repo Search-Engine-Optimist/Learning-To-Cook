@@ -7,14 +7,17 @@ body {
   color: #333;
 }
 
-/* Accessible Header Styles */
+/* Header styles */
 header {
-  background-color: #5a5a5a; /* Medium-dark gray for strong contrast */
-  padding: 1.5em 2em;
+  background: #333;
+  color: #fff;
+  padding: 1rem;
   text-align: center;
-  border-bottom: 1px solid #444;
 }
 
+header h1 {
+  color: #000; /* For light backgrounds */
+}
 header h1 {
   color: #ffffff; /* High contrast white text */
   font-size: 2.5rem;
