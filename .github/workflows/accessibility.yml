@@ -2,9 +2,9 @@ name: Accessibility Audit
 
 on:
   push:
-    branches: [main]
+    branches: [main, chore/prettier-fix]
   pull_request:
-    branches: [main]
+    branches: [main, chore/prettier-fix]
 
 jobs:
   pa11y-check:
