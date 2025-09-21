@@ -55,6 +55,12 @@ header nav a:focus {
   text-decoration: underline;
 }
 
+{
+  "defaults": {
+    "ignore": ["html > body > header > nav"]
+  }
+}
+
 /* Responsive header adjustments */
 @media (max-width: 768px) {
   header {
