@@ -27,12 +27,6 @@ header a {
   font-weight: 500;
 }
 
-header a:hover,
-header a:focus {
-  color: #ffffff;
-  text-decoration: underline;
-}
-
 /* Main content */
 main {
   padding: 2rem;
