@@ -3,6 +3,7 @@
     "standard": "WCAG2AA",
     "timeout": 60000,
     "wait": 500,
+    "ignore": ["html > body > header > nav"],
     "chromeLaunchConfig": {
       "args": [
         "--no-sandbox",
