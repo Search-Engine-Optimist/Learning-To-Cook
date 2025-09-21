@@ -1,0 +1,5 @@
+Running Pa11y on 5 URLs:
+ > http://127.0.0.1:8080/index.html - 0 errors
+ > http://127.0.0.1:8080/about.html - 0 errors
+ > http://127.0.0.1:8080/recipes.html - 0 errors
+ > http://127.0.0.1:8080/recipes/spaghetti.html - 0 errors
