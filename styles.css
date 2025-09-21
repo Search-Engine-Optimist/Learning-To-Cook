@@ -24,6 +24,11 @@ header h1 {
   letter-spacing: 0.5px;
 }
 
+header a {
+  color: #fff; /* or #fdfdff as Pa11y suggests */
+  background-color: #333; /* or whatever ensures 4.5:1+ contrast */
+}
+
 /* Accessible nav styling */
 header nav {
   background-color: #333; /* Dark background */
