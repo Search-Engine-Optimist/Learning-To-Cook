@@ -32,6 +32,26 @@ header a {
   font-weight: 500;
 }
 
+/* Accessible nav styling */
+header nav {
+  background-color: #333; /* Dark background */
+  padding: 0.5em 1em;
+  text-align: center;
+}
+
+header nav a {
+  color: #ffffff; /* White text for strong contrast */
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+header nav a:hover,
+header nav a:focus {
+  color: #ffcc00; /* Optional: high-contrast hover color */
+  text-decoration: underline;
+}
+
 /* Responsive header adjustments */
 @media (max-width: 768px) {
   header {
