@@ -17,6 +17,11 @@ header h1 {
   color: #fff; /* Ensures minimum 3:1 contrast ratio */
 }
 
+header a {
+  color: #fdfdff;
+  text-decoration: none;
+}
+
 nav a {
   color: #fff;
   margin: 0 10px;
