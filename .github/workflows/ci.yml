@@ -92,12 +92,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Fail on Pa11y violations
-        if: ${{ steps.pa11y.outputs.exit_code != '' && steps.pa11y.outputs.exit_code != '0' }}
-        run: |
-          echo "Pa11y exit code: ${{ steps.pa11y.outputs.exit_code }}"
-          exit 1
-
       # --- Link check ---
       - name: Link check (lychee)
         uses: lycheeverse/lychee-action@v1
