@@ -16,23 +16,12 @@ header {
 }
 
 header h1 {
-  color: #000; /* For light backgrounds */
-}
-header h1 {
   color: #ffffff; /* High contrast white text */
   font-size: 2.5rem;
   margin: 0;
   line-height: 1.2;
   font-weight: 700;
   letter-spacing: 0.5px;
-}
-
-/* Navigation links inside header */
-header a {
-  color: #fdfdff; /* High contrast against dark background */
-  margin: 0 10px;
-  text-decoration: none;
-  font-weight: 500;
 }
 
 /* Accessible nav styling */
@@ -43,7 +32,7 @@ header nav {
 }
 
 header nav a {
-  color: #ffffff; /* White text for strong contrast */
+  color: #ffffff !important; /* White text for strong contrast */
   margin: 0 10px;
   text-decoration: none;
   font-weight: 600;
@@ -55,6 +44,7 @@ header nav a:focus {
   text-decoration: underline;
 }
 
+/* Main content */
 main {
   padding: 2rem;
 }
@@ -109,4 +99,15 @@ footer {
 .recipe-card p {
   font-size: 0.9rem;
   color: #555;
+}
+
+/* Responsive header adjustments */
+@media (max-width: 768px) {
+  header {
+    padding: 1em;
+  }
+
+  header h1 {
+    font-size: 2rem;
+  }
 }
