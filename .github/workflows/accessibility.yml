@@ -28,4 +28,4 @@ jobs:
           sleep 5
 
       - name: Run Pa11y CI
-        run: npx pa11y-ci
+        run: npx pa11y-ci --config pa11y-ci.json
