@@ -61,18 +61,6 @@ header nav a:focus {
   }
 }
 
-/* Responsive header adjustments */
-@media (max-width: 768px) {
-  header {
-    padding: 1em;
-  }
-
-  header h1 {
-    font-size: 2rem;
-  }
-}
-
-/* Main content */
 main {
   padding: 2rem;
 }
