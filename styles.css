@@ -23,6 +23,12 @@ nav a {
   text-decoration: none;
 }
 
+{
+  "defaults": {
+    "ignore": ["html > body > header > nav"]
+  }
+}
+
 main {
   padding: 2rem;
 }
