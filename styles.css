@@ -8,22 +8,15 @@ body {
 
 header {
   background: #333;
-  color: #fff; /* Ensures header text is readable */
+  color: #333;
   padding: 1rem;
   text-align: center;
 }
 
 nav a {
-  color: #fdfdff; /* Light text for strong contrast */
+  color: #fff;
   margin: 0 10px;
   text-decoration: none;
-  font-weight: 500;
-}
-
-nav a:hover,
-nav a:focus {
-  color: #ffffff;
-  text-decoration: underline;
 }
 
 main {
