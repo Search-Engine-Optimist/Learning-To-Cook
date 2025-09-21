@@ -15,6 +15,10 @@ header {
   text-align: center;
 }
 
+header h1 {
+  color: #fff; /* Ensures minimum 3:1 contrast ratio */
+}
+
 /* Navigation links inside header */
 header a {
   color: #fdfdff; /* High contrast against dark background */
