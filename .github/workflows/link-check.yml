@@ -16,6 +16,5 @@ jobs:
 
       - name: Run Lychee link checker
         uses: lycheeverse/lychee-action@v1
-         with:
-         args: --config lychee.toml
-
+        with:
+          args: --config lychee.toml
