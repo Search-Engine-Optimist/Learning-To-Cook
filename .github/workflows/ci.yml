@@ -105,11 +105,11 @@ jobs:
         uses: treosh/lighthouse-ci-action@v11
         with:
           urls: |
-             https://www.learningtocook.co.uk/index.html
-             https://www.learningtocook.co.uk/about.html
-             https://www.learningtocook.co.uk/recipes.html
-             https://www.learningtocook.co.uk/contact.html
-             https://www.learningtocook.co.uk/recipes/spaghetti.html
+            https://www.learningtocook.co.uk/index.html
+            https://www.learningtocook.co.uk/about.html
+            https://www.learningtocook.co.uk/recipes.html
+            https://www.learningtocook.co.uk/contact.html
+            https://www.learningtocook.co.uk/recipes/spaghetti.html
           configPath: ./lighthouserc.json
           uploadArtifacts: true
           temporaryPublicStorage: true
