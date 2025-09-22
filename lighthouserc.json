@@ -2,10 +2,14 @@
   "ci": {
     "collect": {
       "numberOfRuns": 1,
-      "url": [
-        "https://www.learningtocook.co.uk/index.html",
-        "https://www.learningtocook.co.uk/about.html"
-      ]
+  "url": [
+      "https://www.learningtocook.co.uk/index.html",
+      "https://www.learningtocook.co.uk/about.html",
+      "https://www.learningtocook.co.uk/recipes.html",
+      "https://www.learningtocook.co.uk/contact.html",
+       "https://www.learningtocook.co.uk/recipes/spaghetti.html"
+    ]
+
     },
     "assert": {
       "preset": "lighthouse:recommended"
