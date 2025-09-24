@@ -115,4 +115,11 @@ footer {
   header h1 {
     font-size: 2rem;
   }
+  
+  @font-face {
+  font-family: 'YourFont';
+  src: url('yourfont.woff2') format('woff2');
+  font-display: swap;
+}
+
 }
