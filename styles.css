@@ -121,6 +121,7 @@ footer {
   src: url('yourfont.woff2') format('woff2');
   font-display: swap;
 }
+  
 .site-header {
   display: flex;
   justify-content: flex-end;
@@ -130,15 +131,16 @@ footer {
 
 .site-nav ul {
   list-style: none;
-  display: flex;
-  gap: 1rem;
+  display: flex;         /* This makes the list horizontal */
+  gap: 1rem;             /* Adds spacing between items */
   margin: 0;
   padding: 0;
+}
+
 }
 
 .site-nav a {
   text-decoration: none;
   font-weight: bold;
 }
-
 }
