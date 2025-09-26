@@ -121,5 +121,24 @@ footer {
   src: url('yourfont.woff2') format('woff2');
   font-display: swap;
 }
+.site-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 1rem;
+}
+
+.site-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.site-nav a {
+  text-decoration: none;
+  font-weight: bold;
+}
 
 }
