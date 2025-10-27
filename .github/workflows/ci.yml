@@ -85,7 +85,7 @@ jobs:
 
       - name: Upload a11y artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: a11y
           path: artifacts/**
@@ -117,7 +117,7 @@ jobs:
       # --- Upload coverage produced by Vitest ---
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage
           path: coverage/**
